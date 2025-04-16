@@ -34,3 +34,6 @@ https://glad.dav1d.de/
     - Options: generate a Loader
     ```
 Click generate, download the ZIP and put it in here (include in include and glad.c next to main)
+
+## Notes
+- For NVim to properly work be sure to generate a compile_commands.json. Use ```compiledb make``` for this.
