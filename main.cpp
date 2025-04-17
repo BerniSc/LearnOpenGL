@@ -19,6 +19,17 @@ void main() {
 }
 )glsl";
 
+const char* vertexShaderTriangleColourSrc = R"glsl(
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;   // color variable at ttribute position 1
+out vec4 vertexColor;                   // specify a color that gets output#ed to the fragment shader -> Shader-Shader communication
+void main() {
+   gl_Position = vec4(aPos, 1.0);
+   vertexColor = vec4(aColor, 1.0);
+}
+)glsl";
+
 const char* fragmentShaderPassthrough = R"glsl(
 #version 330 core
 out vec4 FragColor;
@@ -170,6 +181,8 @@ class Triangle {
         GLuint vertexBufferObjectID = 0;
         const ShaderProgram& shader;
 
+        bool colouredInIndex = false;
+
         const float* vertices;
 
         // Fallback vertices
@@ -179,6 +192,13 @@ class Triangle {
              0.0f,  0.5f, 0.0f  // top
         };
 
+        static constexpr float vertices_coloured[18] = {
+        //  | positions        | colours
+            -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   // left
+             0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,   // right
+             0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f    // top
+        };
+
         void initialize() {
             // Generate VBA as template-object and then VBO to store the Data
             glGenVertexArrays(1, &vertexBufferArrayID);
@@ -186,12 +206,25 @@ class Triangle {
 
             glBindVertexArray(vertexBufferArrayID);
             glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjectID);
-            // For now draw static Data -> TODO change later to allow for dynamic or stream as well
-            glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(vertices), vertices, GL_STATIC_DRAW);
 
             // Shader starts at address 0, VBO is tightly packed
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-            glEnableVertexAttribArray(0);
+            if(this->colouredInIndex) {
+                // For now draw static Data -> TODO change later to allow for dynamic or stream as well
+                glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(vertices_coloured), vertices_coloured, GL_STATIC_DRAW);
+
+                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) 0);
+                glEnableVertexAttribArray(0);
+
+                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float)));
+                glEnableVertexAttribArray(1);
+            } else {
+                // For now draw static Data -> TODO change later to allow for dynamic or stream as well
+                glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+                // Elements are just regular 4 floats broad -> Seperate case
+                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+                glEnableVertexAttribArray(0);
+            }
 
             // Clean up, unbind buffer Object first, then Array
             glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -199,8 +232,8 @@ class Triangle {
         }
 
     public:
-        Triangle(const ShaderProgram& shader, const float* customVertices = vertices_) : 
-            shader(shader), vertices(customVertices) {
+        Triangle(const ShaderProgram& shader, const float* customVertices = vertices_, bool colouredInIndex = false) : 
+            shader(shader), colouredInIndex(colouredInIndex), vertices(customVertices) {
             initialize();
         }
 
@@ -365,6 +398,8 @@ int main() {
         ShaderProgram shaderBlue(vertexShaderTriangleSrc, fragmentShaderBlueSource);
         ShaderProgram passthrough(vertexShaderTriangleSrc, fragmentShaderPassthrough);
 
+        ShaderProgram colourfull(vertexShaderTriangleColourSrc, fragmentShaderPassthrough);
+
         Triangle triangle(shader);
 
         // x-y-z regular coordinate-system
@@ -382,7 +417,8 @@ int main() {
         };
 
 
-        Triangle triangleSmaller(shaderRedTriangle, verticesSmaller);
+        /*Triangle triangleSmaller(shaderRedTriangle, verticesSmaller);*/
+        Triangle triangleSmaller(colourfull, verticesSmaller, true);
 
         Rectangle rectangle(shaderGreen);
         /*Rectangle rectangleBlue(shaderBlue, verticesRectSmaller);*/
