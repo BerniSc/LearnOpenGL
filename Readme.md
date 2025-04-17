@@ -37,3 +37,4 @@ Click generate, download the ZIP and put it in here (include in include and glad
 
 ## Notes
 - For NVim to properly work be sure to generate a compile_commands.json. Use ```compiledb make``` for this.
+- WSL2 seems to support 16 Vertex Attributes

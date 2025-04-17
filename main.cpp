@@ -11,9 +11,20 @@
 const char* vertexShaderTriangleSrc = R"glsl(
 #version 330 core
 layout (location = 0) in vec3 aPos;
+out vec4 vertexColor;                   // specify a color that gets output#ed to the fragment shader -> Shader-Shader communication
 void main() {
    gl_Position = vec4(aPos, 1.0);
+   vertexColor = vec4(0.5, 0.0, 0.0, 1.0); // set the output variable to a dark-red color
 }
+)glsl";
+
+const char* fragmentShaderPassthrough = R"glsl(
+#version 330 core
+out vec4 FragColor;
+in vec4 vertexColor;            // the input variable from the vertex shader (same name and same type) 
+void main() {
+    FragColor = vertexColor;
+} 
 )glsl";
 
 const char* fragmentShaderOrangeSrc = R"glsl(
@@ -327,6 +338,7 @@ int main() {
         ShaderProgram shaderRedTriangle(vertexShaderTriangleSrc, fragmentShaderRedSource);
         ShaderProgram shaderGreen(vertexShaderTriangleSrc, fragmentShaderGreenSource);
         ShaderProgram shaderBlue(vertexShaderTriangleSrc, fragmentShaderBlueSource);
+        ShaderProgram passthrough(vertexShaderTriangleSrc, fragmentShaderPassthrough);
 
         Triangle triangle(shader);
 
@@ -348,7 +360,8 @@ int main() {
         Triangle triangleSmaller(shaderRedTriangle, verticesSmaller);
 
         Rectangle rectangle(shaderGreen);
-        Rectangle rectangleBlue(shaderBlue, verticesRectSmaller);
+        /*Rectangle rectangleBlue(shaderBlue, verticesRectSmaller);*/
+        Rectangle rectangleBlue(passthrough, verticesRectSmaller);
 
         while(window.shouldKeepAlive()) {
             window.clear();
