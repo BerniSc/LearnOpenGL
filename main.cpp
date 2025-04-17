@@ -1,5 +1,6 @@
 // main.cpp
 
+#include <cmath>
 #include <glad/glad.h>
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
@@ -59,7 +60,15 @@ void main() {
 }
 )glsl";
 
-
+const char* fragmentShaderUniformed = R"glsl(
+#version 330 core
+out vec4 FragColor;
+// Declared but not used uniform will SILENTLY be removed!!!! PLEEEEASE Remeber this. I see horrible debugging coming ;-(
+uniform vec4 uniformedColor; // Set by OpenGL CPU code
+void main() {
+    FragColor = uniformedColor;
+}   
+)glsl";
 
 class GLException {
     private:
@@ -82,6 +91,9 @@ void framebuffer_size_callback(GLFWwindow*, int width, int height) {
 class ShaderProgram {
     private:
         GLuint shaderProgramID = 0;
+        // Use a uniform to vary our color based on the Time -> Seed our time and then interpolate our "Hue", send value to location gotten in init
+        const bool varyColourTimed = false;
+        int vertexColorLocation;
 
         GLuint compileShader(GLenum type, const char* source) {
             GLuint shader = glCreateShader(type);
@@ -119,10 +131,16 @@ class ShaderProgram {
             // Clean up trash -> Used shaders and bundled into Program
             glDeleteShader(vertexShader);
             glDeleteShader(fragmentShader);
+
+            if(this->varyColourTimed) {
+                vertexColorLocation = glGetUniformLocation(shaderProgramID, "uniformedColor");
+                if(vertexColorLocation == -1)
+                    std::cerr << "Our uniform has not been found. Shit!\n";
+            }
         }
 
     public:
-        ShaderProgram(const char* vertexSource, const char* fragmentSource) {
+        ShaderProgram(const char* vertexSource, const char* fragmentSource, const bool& useUniform = false) : varyColourTimed(useUniform) {
             compile(vertexSource, fragmentSource);
         }
 
@@ -132,6 +150,12 @@ class ShaderProgram {
 
         void use() const {
             glUseProgram(shaderProgramID);
+            if(this->varyColourTimed) {
+                float timeValue = glfwGetTime();
+                float greenHue = ((sin(timeValue) / 2.0f) + 0.5f);
+                greenHue = (sin(glfwGetTime()) / 2.0f) + 0.5f;
+                glUniform4f(vertexColorLocation, 0.0f, greenHue, 0.0f, 1.0f);
+            }
         }
 
         GLuint id() const {
@@ -336,7 +360,8 @@ int main() {
 
         ShaderProgram shader(vertexShaderTriangleSrc, fragmentShaderOrangeSrc);
         ShaderProgram shaderRedTriangle(vertexShaderTriangleSrc, fragmentShaderRedSource);
-        ShaderProgram shaderGreen(vertexShaderTriangleSrc, fragmentShaderGreenSource);
+        /*ShaderProgram shaderGreen(vertexShaderTriangleSrc, fragmentShaderGreenSource);*/
+        ShaderProgram shaderGreen(vertexShaderTriangleSrc, fragmentShaderUniformed, true);
         ShaderProgram shaderBlue(vertexShaderTriangleSrc, fragmentShaderBlueSource);
         ShaderProgram passthrough(vertexShaderTriangleSrc, fragmentShaderPassthrough);
 
