@@ -8,6 +8,8 @@
 #include <iostream>
 #include <ostream>
 #include <string>
+#include <fstream>
+#include <sstream>
 
 const char* vertexShaderTriangleSrc = R"glsl(
 #version 330 core
@@ -106,6 +108,31 @@ class ShaderProgram {
         const bool varyColourTimed = false;
         int vertexColorLocation;
 
+        // We have gotten our shaders from a File
+        const bool filed = false;
+
+        // If we dont want to load our Shader via a RAW-STRING we can load it from
+        // a file to keep everything a bit more organized
+        std::string loadShaderFromFile(const char* path) {
+            std::ifstream file;
+            // Ensure or ifstream can throw exceptions
+            file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            std::stringstream buffer;
+
+            try {
+                file.open(path);
+                // TODO Use GL Exception here? Its not really GL tho
+                if(!file.is_open())
+                    throw std::runtime_error(std::string("Failed to open shader file: ") + path);
+                buffer << file.rdbuf();
+            } catch(std::ifstream::failure ex) {
+                std::cerr << "ERROR::SHADER_FILE_READ: " << ex.what() << std::endl;
+                throw GLException("Shader file could not be read!");
+            }
+            std::cout << buffer.str().c_str();
+            return buffer.str().c_str();
+        }
+
         GLuint compileShader(GLenum type, const char* source) {
             GLuint shader = glCreateShader(type);
             glShaderSource(shader, 1, &source, nullptr);
@@ -155,6 +182,14 @@ class ShaderProgram {
             compile(vertexSource, fragmentSource);
         }
 
+        ShaderProgram(bool filed, const std::string& vertexFilePath, const std::string& fragmentFilePath, bool useUniform = false)
+            : varyColourTimed(useUniform), filed(filed) {
+            std::string vShaderCode = loadShaderFromFile(vertexFilePath.c_str());
+            std::string fShaderCode = loadShaderFromFile(fragmentFilePath.c_str());
+            compile(vShaderCode.c_str(), fShaderCode.c_str());
+        }
+
+
         ~ShaderProgram() {
             glDeleteProgram(shaderProgramID);
         }
@@ -168,6 +203,19 @@ class ShaderProgram {
                 glUniform4f(vertexColorLocation, 0.0f, greenHue, 0.0f, 1.0f);
             }
         }
+
+        void setBool(const std::string& name, bool value) const {
+            glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), (int)value);
+        }
+
+        void setInt(const std::string& name, int value) const {
+            glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), value);
+        }
+
+        void setFloat(const std::string& name, float value) const {
+            glUniform1f(glGetUniformLocation(shaderProgramID, name.c_str()), value);
+        }
+
 
         GLuint id() const {
             return shaderProgramID;
@@ -397,6 +445,7 @@ int main() {
         ShaderProgram shaderGreen(vertexShaderTriangleSrc, fragmentShaderUniformed, true);
         ShaderProgram shaderBlue(vertexShaderTriangleSrc, fragmentShaderBlueSource);
         ShaderProgram passthrough(vertexShaderTriangleSrc, fragmentShaderPassthrough);
+        ShaderProgram myLoadFile(true, "./shaders/triangle.vs.glsl", "./shaders/shaderRed.fs.glsl");
 
         ShaderProgram colourfull(vertexShaderTriangleColourSrc, fragmentShaderPassthrough);
 
@@ -420,7 +469,8 @@ int main() {
         /*Triangle triangleSmaller(shaderRedTriangle, verticesSmaller);*/
         Triangle triangleSmaller(colourfull, verticesSmaller, true);
 
-        Rectangle rectangle(shaderGreen);
+        /*Rectangle rectangle(shaderGreen);*/
+        Rectangle rectangle(myLoadFile);
         /*Rectangle rectangleBlue(shaderBlue, verticesRectSmaller);*/
         Rectangle rectangleBlue(passthrough, verticesRectSmaller);
 
