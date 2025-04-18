@@ -1,10 +1,10 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17 -lglfw -ldl -lGL
-INCLUDES = -I./include
+INCLUDES = -I./include  -I./
 TARGET = main
 
 # Source files
-SRCS = glad.o myWrappers/GLException.cpp myWrappers/ShaderProgram.cpp myWrappers/GLWindow.cpp myWrappers/Triangle.cpp myWrappers/Rectangle.cpp main.cpp 
+SRCS = glad.o src/core/GLException.cpp src/core/GLWindow.cpp src/core/IndexBuffer.cpp src/core/Shader.cpp src/core/ShaderProgram.cpp src/core/Texture.cpp src/core/VertexArray.cpp src/core/VertexBuffer.cpp src/drawable/Rectangle.cpp src/drawable/TexturedRectangle.cpp src/drawable/Triangle.cpp main.cpp 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
 

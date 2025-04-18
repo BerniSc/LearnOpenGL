@@ -13,9 +13,10 @@ std::string ShaderProgram::loadShaderFromFile(const char* path) {
 
     try {
         file.open(path);
+        std::cout << "\n\n" << file.is_open();
         // TODO Use GL Exception here? Its not really GL tho
         if(!file.is_open())
-            throw std::runtime_error(std::string("Failed to open shader file: ") + path);
+            throw std::runtime_error(std::string("Failed ++ to open shader file: ") + path);
         buffer << file.rdbuf();
     } catch(std::ifstream::failure& ex) {
         std::cerr << "ERROR::SHADER_FILE_READ: " << ex.what() << std::endl;
