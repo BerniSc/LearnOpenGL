@@ -4,7 +4,7 @@ INCLUDES = -I./include
 TARGET = main
 
 # Source files
-SRCS = main.cpp glad.o
+SRCS = glad.o myWrappers/GLException.cpp myWrappers/ShaderProgram.cpp myWrappers/GLWindow.cpp myWrappers/Triangle.cpp myWrappers/Rectangle.cpp main.cpp 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
 
