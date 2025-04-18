@@ -77,16 +77,6 @@ void main() {
 }
 )glsl";
 
-const char* fragmentShaderUniformed = R"glsl(
-#version 330 core
-out vec4 FragColor;
-// Declared but not used uniform will SILENTLY be removed!!!! PLEEEEASE Remeber this. I see horrible debugging coming ;-(
-uniform vec4 uniformedColor; // Set by OpenGL CPU code
-void main() {
-    FragColor = uniformedColor;
-}   
-)glsl";
-
 int main() {
     try {
         GLWindow window(800, 800, "Clean Triangle");
@@ -94,7 +84,8 @@ int main() {
         ShaderProgram shader(vertexShaderTriangleSrc, fragmentShaderOrangeSrc);
         ShaderProgram shaderRedTriangle(vertexShaderTriangleSrc, fragmentShaderRedSource);
         /*ShaderProgram shaderGreen(vertexShaderTriangleSrc, fragmentShaderGreenSource);*/
-        ShaderProgram shaderGreen(vertexShaderTriangleSrc, fragmentShaderUniformed, true);
+        ShaderProgram shaderGreen(true, "./shaders/triangle.vs.glsl", "./shaders/shaderUniformed.fs.glsl");
+        shaderGreen.setFloat4("uniformedColor", 0.5f, 0.2f, 0.5f, 0.0f);
         ShaderProgram shaderBlue(vertexShaderTriangleSrc, fragmentShaderBlueSource);
         ShaderProgram passthrough(vertexShaderTriangleSrc, fragmentShaderPassthrough);
         ShaderProgram myLoadFile(true, "./shaders/triangle.vs.glsl", "./shaders/shaderRed.fs.glsl");
@@ -119,7 +110,7 @@ int main() {
 
 
         /*Triangle triangleSmaller(shaderRedTriangle, verticesSmaller);*/
-        Triangle triangleSmaller(colourfull, verticesSmaller, true);
+        Triangle triangleSmaller(shaderGreen, verticesSmaller);
 
         /*Rectangle rectangle(shaderGreen);*/
         Rectangle rectangle(myLoadFile);
