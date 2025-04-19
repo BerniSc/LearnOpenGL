@@ -2,6 +2,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <memory>
+#include <vector>
 
 #include "core/GLException.hpp"
 #include "core/GLWindow.hpp"
@@ -71,11 +73,6 @@ int main() {
             {1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float)}
         };
 
-        std::vector<VertexAttribute> textureAttributes = {
-            {0, 3, GL_FLOAT, GL_FALSE, 0},
-            {1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float)}
-        };
-
         static constexpr float rectangleVertices[12] = {
             0.5f,  0.5f, 0.0f,
             0.5f, -0.5f, 0.0f,
@@ -94,10 +91,36 @@ int main() {
         float breathingBlueValue = 0.0f;
         float breathingRedValue = 0.0f;
 
+        static constexpr float defaultVertices[32] = {
+            // | Positions    | Tex-Coordinates
+            0.3f,  0.3f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top right
+            0.3f, -0.3f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
+           -0.3f, -0.3f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  // bottom left
+           -0.3f,  0.3f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,  // top left
+        };
+
+        std::vector<VertexAttribute> textureAttributes = {
+            {0, 3, GL_FLOAT, GL_FALSE, 0},
+            {1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float)},
+            {2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float)}
+        };
+
         Shader simpleTextureVS(GL_VERTEX_SHADER, "./shaders/simpleTexture.vs.glsl", true);
         Shader simpleTextureFS(GL_FRAGMENT_SHADER, "./shaders/simpleTexture.fs.glsl", true);
         ShaderProgram simpleTexture(simpleTextureVS, simpleTextureFS);
-        TexturedRectangle trect(simpleTexture, "./assets/wall.jpg", 4, 5 * sizeof(float), textureAttributes);
+        /*Texture wall = Texture("./assets/wall.jpg", GL_TEXTURE0);*/
+        /*Texture face = Texture("./assets/wall.jpg", GL_TEXTURE1);*/
+        /*Texture face = Texture("./assets/awesomeface.png", GL_TEXTURE1);*/
+        std::vector<std::shared_ptr<Texture>> tmp;
+        tmp.emplace_back(std::make_shared<Texture>("./assets/wall.jpg", GL_TEXTURE0));
+        tmp.emplace_back(std::make_shared<Texture>("./assets/awesomeface.png", GL_TEXTURE1));
+        /*tmp.emplace_back("./assets/wall.jpg", GL_TEXTURE0);*/
+        /*tmp.emplace_back("./assets/awesomeface.png", GL_TEXTURE1);*/
+        simpleTexture.setInt("texture1", 0);
+        simpleTexture.setInt("texture2", 1);
+        TexturedRectangle trect(simpleTexture, tmp, 4, 8 * sizeof(float), textureAttributes, defaultVertices);
+        /*TexturedRectangle trect(simpleTexture, "./assets/wall.jpg", 4, 8 * sizeof(float), textureAttributes, defaultVertices);*/
+
 
         // Main render loop
         while(window.shouldKeepAlive()) {

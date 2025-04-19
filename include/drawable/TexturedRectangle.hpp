@@ -6,13 +6,14 @@
 #include "core/VertexArray.hpp"
 #include "core/VertexBuffer.hpp"
 #include "core/Texture.hpp"
+#include <memory>
 
 class TexturedRectangle : public Drawable {
 private:
     VertexArray vao;
     VertexBuffer vbo;
     const ShaderProgram& shader;
-    Texture texture;
+    std::vector<std::shared_ptr<Texture>> textures;
 
     static constexpr float defaultVertices[20] = {
         // | Positions    | Tex-Coordinates
@@ -26,6 +27,11 @@ public:
     TexturedRectangle(const ShaderProgram& shader, const char* texturePath, const float* vertices = defaultVertices);
     TexturedRectangle(const ShaderProgram& shader, const char* texturePath, size_t vertexCount, GLsizei stride, 
             const std::vector<VertexAttribute>& attributes, const float* vertices = defaultVertices);
+
+    TexturedRectangle(const ShaderProgram& shader, const std::vector<std::shared_ptr<Texture>>& textures, const float* vertices = defaultVertices);
+    TexturedRectangle(const ShaderProgram& shader, const std::vector<std::shared_ptr<Texture>>& textures, size_t vertexCount, GLsizei stride, 
+            const std::vector<VertexAttribute>& attributes, const float* vertices = defaultVertices);
+
     void draw() const override;
 };
 

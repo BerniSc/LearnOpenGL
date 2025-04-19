@@ -1,22 +1,27 @@
 #ifndef TEXTURE_HPP
 #define TEXTURE_HPP
 
+#include <cstdint>
 #include <glad/glad.h>
 #include <string>
 
 class Texture {
-private:
-    GLuint textureID;
-    std::string filePath;
+    private:
+        GLuint textureID;
+        std::string filePath;
 
-public:
-    Texture(const std::string& filePath);
-    ~Texture();
+        static uint8_t instanceCounter;
 
-    void bind() const;
-    void unbind() const;
+        GLuint textureLocation;
+    public:
+        Texture(const std::string& filePath, GLuint textureLocation = GL_TEXTURE0);
+        ~Texture();
 
-    GLuint getID() const;
+        void bind() const;
+        void unbind() const;
+
+        GLuint getID() const;
+        GLuint getLocation() const;
 };
 
 #endif // TEXTURE_HPP

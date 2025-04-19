@@ -34,10 +34,12 @@ GLint ShaderProgram::getUniformLocation(const std::string& name) {
 }
 
 void ShaderProgram::setBool(const std::string &name, bool value) {         
+    this->use();
     glUniform1i(getUniformLocation(name), (int)value); 
 }
 
 void ShaderProgram::setInt(const std::string &name, int value) { 
+    this->use();
     glUniform1i(getUniformLocation(name), value); 
 }
 

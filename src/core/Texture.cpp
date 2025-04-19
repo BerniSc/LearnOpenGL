@@ -3,10 +3,11 @@
 #include "stbInclude.hpp"
 #include <iostream>
 
-Texture::Texture(const std::string& filePath) : filePath(filePath) {
-    std::cout << "Implicit Constructor call, cool" << std::endl;
+Texture::Texture(const std::string& filePath, GLuint textureLocation) : filePath(filePath), textureLocation(textureLocation) {
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
+
+    instanceCounter++;
 
     // TODO Make these configurable
     // set the texture wrapping/filtering options (on the currently bound texture object)
@@ -17,6 +18,7 @@ Texture::Texture(const std::string& filePath) : filePath(filePath) {
 
     // Load image
     int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &nrChannels, 0);
     if(data) {
         GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
@@ -31,10 +33,13 @@ Texture::Texture(const std::string& filePath) : filePath(filePath) {
 }
 
 Texture::~Texture() {
+    std::cout << "Deleted " << textureID << std::endl;
     glDeleteTextures(1, &textureID);
 }
 
 void Texture::bind() const {
+    glActiveTexture(textureLocation);
+    /*std::cout << this->getLocation() << "|" << textureID << std::endl;*/
     glBindTexture(GL_TEXTURE_2D, textureID);
 }
 
@@ -45,3 +50,9 @@ void Texture::unbind() const {
 GLuint Texture::getID() const {
     return textureID;
 }
+
+GLuint Texture::getLocation() const {
+    return (this->textureLocation - GL_TEXTURE0);
+}
+
+uint8_t Texture::instanceCounter = 0;
