@@ -37,6 +37,7 @@ void ShaderProgram::setFloat(const std::string& name, float value) {
 }
 
 void ShaderProgram::setFloat4(const std::string& name, float x, float y, float z, float w) {
+    this->use();
     glUniform4f(getUniformLocation(name), x, y, z, w);
 }
 
