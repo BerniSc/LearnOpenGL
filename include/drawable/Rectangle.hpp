@@ -20,7 +20,7 @@ private:
     };
 
 public:
-    Rectangle(const ShaderProgram& shader, const float* vertices = defaultVertices);
+    Rectangle(const ShaderProgram& shader, const float* vertices = defaultVertices, bool wireframeMode = false);
     void draw() const override;
 };
 

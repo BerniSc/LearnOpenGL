@@ -1,13 +1,14 @@
+#include <cmath>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include "core/GLException.hpp"
 #include "core/GLWindow.hpp"
 #include "core/Shader.hpp"
 #include "core/ShaderProgram.hpp"
 #include "drawable/Triangle.hpp"
 #include "drawable/Rectangle.hpp"
-#include "myWrappers/GLException.hpp"
 
 const char* vertexShaderSrc = R"glsl(
 #version 330 core
@@ -33,18 +34,38 @@ int main() {
         GLWindow window(800, 600, "Refactored OpenGL");
 
         // Load shaders from files
-        Shader vertexShader(GL_VERTEX_SHADER, "./shaders/triangle.vs.glsl", true);          // true means load from file
-        std::cout << "Still here";
-        Shader fragmentShader(GL_FRAGMENT_SHADER, "./shaders/triangle.fs.glsl", true);      // true means load from file
+        Shader vertexShader(GL_VERTEX_SHADER, "./shaders/simpleVertexShader.vs.glsl", true);          // true means load from file
+        Shader fragmentShader(GL_FRAGMENT_SHADER, "./shaders/triangle.fs.glsl", true);                // true means load from file
+
+        Shader colourfullVertexShader(GL_VERTEX_SHADER, "./shaders/triangle.vs.glsl", true);
+        Shader colourfullFragmentShader(GL_FRAGMENT_SHADER, "./shaders/shaderPipedColour.fs.glsl", true);
+
+        Shader uniformedVectexShader(GL_VERTEX_SHADER, "./shaders/simpleVertexShader.vs.glsl", true);
+        Shader uniformedFragmentShader(GL_FRAGMENT_SHADER, "./shaders/shaderUniformed.fs.glsl", true);
+        
         // Shader Programs
         ShaderProgram shader(vertexShader, fragmentShader);
+        ShaderProgram breathing(uniformedVectexShader, uniformedFragmentShader);
+        ShaderProgram colourfullProg(colourfullVertexShader, colourfullFragmentShader); 
+        /*breathing.setFloat4("uniformedColor", 0.0f, 0.8f, 0.0f, 0.0f);*/
 
         // Vertices for shapes
         static constexpr float triangleVertices[9] = {
-            -0.5f, -0.5f, 0.0f, 
-             0.5f, -0.5f, 0.0f, 
-             0.0f,  0.5f, 0.0f  
+            -0.5f, -0.3f, 0.0f, 
+             0.5f, -0.3f, 0.0f, 
+             0.0f,  0.8f, 0.0f  
         };
+
+        static constexpr float triangleReversedVerticesWithColour[18] = {
+            -0.55f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+             0.55f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+             0.0f,  -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        };
+        std::vector<VertexAttribute> attributesVertexColour = {
+            {0, 3, GL_FLOAT, GL_FALSE, 0},
+            {1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float)}
+        };
+
         static constexpr float rectangleVertices[12] = {
             0.5f,  0.5f, 0.0f,
             0.5f, -0.5f, 0.0f,
@@ -53,19 +74,33 @@ int main() {
         };
 
         // Create drawable objects
-        Triangle triangle(shader, triangleVertices);
-        Rectangle rectangle(shader, rectangleVertices);
+        Triangle triangle(shader, triangleVertices, true);
+        Triangle triangleRevered(colourfullProg, triangleReversedVerticesWithColour, 3, 6 * sizeof(float), attributesVertexColour, false);
+        Rectangle rectangle(breathing, rectangleVertices);
+
+        float timeStamp = glfwGetTime();
+        float breathingGreenValue = 0.0f;
+        float breathingBlueValue = 0.0f;
+        float breathingRedValue = 0.0f;
 
         // Main render loop
         while(window.shouldKeepAlive()) {
             window.clear();
-            /*triangle.draw();*/
+            triangle.draw();
             rectangle.draw();
+            triangleRevered.draw();
             window.display();
             window.pollEvents();
+
+            // Recalculate Breathing
+            breathing.setFloat4("uniformedColor", breathingRedValue, breathingGreenValue, breathingBlueValue, 1.0f);
+            breathingGreenValue = (std::sin(timeStamp / 2) / 2.0f) + 0.5f;
+            breathingBlueValue = (std::sin(timeStamp / 3 + M_2_PI) / 2.0f) + 0.5f;
+            breathingRedValue = (std::sin(timeStamp / 4) / 2.0f) + 0.5f;
+            timeStamp = glfwGetTime();
         }
 
-    } catch (const GLException& ex) {
+    } catch(const GLException& ex) {
         std::cerr << ex << std::endl;
         return EXIT_FAILURE;
     }

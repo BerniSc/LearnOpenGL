@@ -1,5 +1,5 @@
 #include "core/Shader.hpp"
-#include "myWrappers/GLException.hpp"
+#include "core/GLException.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>

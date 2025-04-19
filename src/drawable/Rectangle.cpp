@@ -1,8 +1,9 @@
 #include "drawable/Rectangle.hpp"
 #include <glad/glad.h>
 
-Rectangle::Rectangle(const ShaderProgram& shader, const float* vertices)
+Rectangle::Rectangle(const ShaderProgram& shader, const float* vertices, bool wireframeMode)
     : shader(shader) {
+    this->wireframeMode = wireframeMode;
 
     vao.bind();
     vbo.bind();
@@ -19,5 +20,13 @@ Rectangle::Rectangle(const ShaderProgram& shader, const float* vertices)
 void Rectangle::draw() const {
     shader.use();
     vao.bind();
+
+    if(wireframeMode)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    vao.unbind();
 }
