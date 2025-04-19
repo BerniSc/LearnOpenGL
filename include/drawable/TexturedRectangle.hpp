@@ -14,15 +14,18 @@ private:
     const ShaderProgram& shader;
     Texture texture;
 
-    static constexpr float defaultVertices[12] = {
-        0.5f,  0.5f, 0.0f,  // top right
-        0.5f, -0.5f, 0.0f,  // bottom right
-       -0.5f, -0.5f, 0.0f,  // bottom left
-       -0.5f,  0.5f, 0.0f   // top left
+    static constexpr float defaultVertices[20] = {
+        // | Positions    | Tex-Coordinates
+        0.3f,  0.3f, 0.0f, 1.0f, 1.0f,  // top right
+        0.3f, -0.3f, 0.0f, 1.0f, 0.0f,  // bottom right
+       -0.3f, -0.3f, 0.0f, 0.0f, 0.0f,  // bottom left
+       -0.3f,  0.3f, 0.0f, 0.0f, 1.0f,  // top left
     };
 
 public:
     TexturedRectangle(const ShaderProgram& shader, const char* texturePath, const float* vertices = defaultVertices);
+    TexturedRectangle(const ShaderProgram& shader, const char* texturePath, size_t vertexCount, GLsizei stride, 
+            const std::vector<VertexAttribute>& attributes, const float* vertices = defaultVertices);
     void draw() const override;
 };
 

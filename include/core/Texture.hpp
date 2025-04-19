@@ -6,7 +6,7 @@
 
 class Texture {
 private:
-    GLuint id;
+    GLuint textureID;
     std::string filePath;
 
 public:

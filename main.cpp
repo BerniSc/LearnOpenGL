@@ -7,6 +7,7 @@
 #include "core/GLWindow.hpp"
 #include "core/Shader.hpp"
 #include "core/ShaderProgram.hpp"
+#include "drawable/TexturedRectangle.hpp"
 #include "drawable/Triangle.hpp"
 #include "drawable/Rectangle.hpp"
 
@@ -31,7 +32,7 @@ void main() {
 
 int main() {
     try {
-        GLWindow window(800, 600, "Refactored OpenGL");
+        GLWindow window(800, 800, "Refactored OpenGL");
 
         // Load shaders from files
         Shader vertexShader(GL_VERTEX_SHADER, "./shaders/simpleVertexShader.vs.glsl", true);          // true means load from file
@@ -48,6 +49,10 @@ int main() {
         ShaderProgram breathing(uniformedVectexShader, uniformedFragmentShader);
         ShaderProgram colourfullProg(colourfullVertexShader, colourfullFragmentShader); 
         /*breathing.setFloat4("uniformedColor", 0.0f, 0.8f, 0.0f, 0.0f);*/
+
+        Shader taskTestPipeV(GL_VERTEX_SHADER, "./shaders/shaderPipedColour.vs.glsl", true);
+        Shader taskTestPipeF(GL_FRAGMENT_SHADER, "./shaders/shaderPipedColour.fs.glsl", true);
+        ShaderProgram testTest(taskTestPipeV, taskTestPipeF);
 
         // Vertices for shapes
         static constexpr float triangleVertices[9] = {
@@ -66,6 +71,11 @@ int main() {
             {1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float)}
         };
 
+        std::vector<VertexAttribute> textureAttributes = {
+            {0, 3, GL_FLOAT, GL_FALSE, 0},
+            {1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float)}
+        };
+
         static constexpr float rectangleVertices[12] = {
             0.5f,  0.5f, 0.0f,
             0.5f, -0.5f, 0.0f,
@@ -74,7 +84,8 @@ int main() {
         };
 
         // Create drawable objects
-        Triangle triangle(shader, triangleVertices, true);
+        /*Triangle triangle(shader, triangleVertices, true);*/
+        Triangle triangle(testTest, triangleVertices);
         Triangle triangleRevered(colourfullProg, triangleReversedVerticesWithColour, 3, 6 * sizeof(float), attributesVertexColour, false);
         Rectangle rectangle(breathing, rectangleVertices);
 
@@ -83,12 +94,18 @@ int main() {
         float breathingBlueValue = 0.0f;
         float breathingRedValue = 0.0f;
 
+        Shader simpleTextureVS(GL_VERTEX_SHADER, "./shaders/simpleTexture.vs.glsl", true);
+        Shader simpleTextureFS(GL_FRAGMENT_SHADER, "./shaders/simpleTexture.fs.glsl", true);
+        ShaderProgram simpleTexture(simpleTextureVS, simpleTextureFS);
+        TexturedRectangle trect(simpleTexture, "./assets/wall.jpg", 4, 5 * sizeof(float), textureAttributes);
+
         // Main render loop
         while(window.shouldKeepAlive()) {
             window.clear();
-            triangle.draw();
             rectangle.draw();
             triangleRevered.draw();
+            triangle.draw();
+            trect.draw();
             window.display();
             window.pollEvents();
 
