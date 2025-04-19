@@ -16,8 +16,7 @@ Shader::~Shader() {
 }
 
 std::string Shader::loadSourceFromFile(const std::string& filepath) {
-    std::cout << "Trying to load from file";
-    std::cout << filepath;
+    std::cout << "Trying to load Shader from file: " << filepath << std::endl;
     std::ifstream file(filepath.c_str());
     if(!file.is_open())
         throw std::runtime_error("Failed to open shader file: " + filepath);

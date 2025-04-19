@@ -10,7 +10,7 @@ ShaderProgram::ShaderProgram(const Shader& vertexShader, const Shader& fragmentS
 
     GLint success;
     glGetProgramiv(id, GL_LINK_STATUS, &success);
-    if (!success) {
+    if(!success) {
         char infoLog[512];
         glGetProgramInfoLog(id, 512, nullptr, infoLog);
         throw std::runtime_error("Shader program linking failed:\n" + std::string(infoLog));
@@ -26,13 +26,23 @@ void ShaderProgram::use() const {
 }
 
 GLint ShaderProgram::getUniformLocation(const std::string& name) {
-    if (uniformLocations.find(name) == uniformLocations.end()) {
+    // Alternative way to get the location is via slow Querry to GPU
+    // glGetUniformLocation(ID, name.c_str())
+    if(uniformLocations.find(name) == uniformLocations.end())
         uniformLocations[name] = glGetUniformLocation(id, name.c_str());
-    }
     return uniformLocations[name];
 }
 
+void ShaderProgram::setBool(const std::string &name, bool value) {         
+    glUniform1i(getUniformLocation(name), (int)value); 
+}
+
+void ShaderProgram::setInt(const std::string &name, int value) { 
+    glUniform1i(getUniformLocation(name), value); 
+}
+
 void ShaderProgram::setFloat(const std::string& name, float value) {
+    this->use();
     glUniform1f(getUniformLocation(name), value);
 }
 

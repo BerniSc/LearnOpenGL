@@ -24,6 +24,9 @@ void Rectangle::draw() const {
     if(wireframeMode)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    // Can use the EBO Approach to get along with our 4 vertices by suppling 6 indices that then get drawn
+    // Good approach and more efficient, but the DrawArrays works as well and is much easier to setup
+    // TODO Maybe implement a efficient approach using the EBO here, but thats no Piority
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
