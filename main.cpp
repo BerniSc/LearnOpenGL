@@ -32,6 +32,8 @@ void main() {
 }
 )glsl";
 
+void processInput(GLFWwindow *window, float& mixValue);
+
 int main() {
     try {
         GLWindow window(800, 800, "Refactored OpenGL");
@@ -93,10 +95,10 @@ int main() {
 
         static constexpr float defaultVertices[32] = {
             // | Positions    | Tex-Coordinates
-            0.3f,  0.3f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top right
-            0.3f, -0.3f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
+            0.3f,  0.3f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, 2.0f,  // top right
+            0.3f, -0.3f, 0.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f,  // bottom right
            -0.3f, -0.3f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  // bottom left
-           -0.3f,  0.3f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,  // top left
+           -0.3f,  0.3f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f,  // top left
         };
 
         std::vector<VertexAttribute> textureAttributes = {
@@ -116,14 +118,18 @@ int main() {
         tmp.emplace_back(std::make_shared<Texture>("./assets/awesomeface.png", GL_TEXTURE1));
         /*tmp.emplace_back("./assets/wall.jpg", GL_TEXTURE0);*/
         /*tmp.emplace_back("./assets/awesomeface.png", GL_TEXTURE1);*/
+        tmp[1]->setStuff();
         simpleTexture.setInt("texture1", 0);
         simpleTexture.setInt("texture2", 1);
         TexturedRectangle trect(simpleTexture, tmp, 4, 8 * sizeof(float), textureAttributes, defaultVertices);
         /*TexturedRectangle trect(simpleTexture, "./assets/wall.jpg", 4, 8 * sizeof(float), textureAttributes, defaultVertices);*/
 
+        float mixValue = 0.2f;
+        simpleTexture.setFloat("mixValue", mixValue);
 
         // Main render loop
         while(window.shouldKeepAlive()) {
+            processInput(window.get(), mixValue);
             window.clear();
             rectangle.draw();
             triangleRevered.draw();
@@ -138,6 +144,8 @@ int main() {
             breathingBlueValue = (std::sin(timeStamp / 3 + M_2_PI) / 2.0f) + 0.5f;
             breathingRedValue = (std::sin(timeStamp / 4) / 2.0f) + 0.5f;
             timeStamp = glfwGetTime();
+
+            simpleTexture.setFloat("mixValue", mixValue);
         }
 
     } catch(const GLException& ex) {
@@ -148,3 +156,18 @@ int main() {
     return EXIT_SUCCESS;
 }
 
+void processInput(GLFWwindow *window, float& mixValue) {
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        mixValue += 0.001f;
+        if(mixValue >= 1.0f)
+            mixValue = 1.0f;
+    }
+    if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        mixValue -= 0.001f;
+        if(mixValue <= 0.0f)
+            mixValue = 0.0f;
+    }
+}

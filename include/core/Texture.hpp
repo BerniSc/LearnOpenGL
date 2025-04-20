@@ -20,6 +20,14 @@ class Texture {
         void bind() const;
         void unbind() const;
 
+        // TODO FIXME make parametrizable! This is just for testing and sucks
+        inline void setStuff() {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        }
+
         GLuint getID() const;
         GLuint getLocation() const;
 };
