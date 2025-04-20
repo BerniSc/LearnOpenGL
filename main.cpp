@@ -34,7 +34,32 @@ void main() {
 
 void processInput(GLFWwindow *window, float& mixValue);
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+void playgroundTestGLM(ShaderProgram& s) {
+    //
+    // Keep w as 1; Later used for perspective transformations
+    glm::vec4 vector(1.0f, 0.0f, 0.0f, 1.0f);
+    // Unit matrix
+    glm::mat4 translationMatrix = glm::mat4(1.0f);
+    float t = float(glfwGetTime());
+    // Create a translationMatrix in matrix passed by ref using vec
+    translationMatrix = glm::translate(translationMatrix, glm::vec3(0.1f * std::sin(t), 0.3f * std::cos(t) * std::sin(3*t), 0.0f));
+    // Rotate by 90 deg converted to rad on z axis and scale each coordinate by 0.5
+    // REMEMBER that rotationAxis should be unitVector -> Normalize
+    translationMatrix = glm::rotate(translationMatrix, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    translationMatrix = glm::scale(translationMatrix, glm::vec3(1.5 * std::cos(0.1f * t), 1.5 * std::cos(0.09f * t), 1));  
+    // Translate vector as expected
+    /*vector = translationMatrix * vector;*/
+    /*std::cout << vector.x << " " << vector.y << " " << vector.z << std::endl;*/
+    unsigned int transformLoc = glGetUniformLocation(s.getID(), "transformM");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(translationMatrix));
+}
+
 int main() {
+
     try {
         GLWindow window(800, 800, "Refactored OpenGL");
 
@@ -124,6 +149,7 @@ int main() {
         TexturedRectangle trect(simpleTexture, tmp, 4, 8 * sizeof(float), textureAttributes, defaultVertices);
         /*TexturedRectangle trect(simpleTexture, "./assets/wall.jpg", 4, 8 * sizeof(float), textureAttributes, defaultVertices);*/
 
+
         float mixValue = 0.2f;
         simpleTexture.setFloat("mixValue", mixValue);
 
@@ -135,6 +161,7 @@ int main() {
             triangleRevered.draw();
             triangle.draw();
             trect.draw();
+            playgroundTestGLM(simpleTexture);
             window.display();
             window.pollEvents();
 
