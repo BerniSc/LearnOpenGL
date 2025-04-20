@@ -27,3 +27,10 @@ void TexturedCube::draw() const {
     glDrawArrays(GL_TRIANGLES, 0, 36);
     vao.unbind();
 }
+
+void TexturedCube::draw(const std::vector<glm::mat4>& transforms, const std::string& uniformName) const {
+    for(const glm::mat4& mat : transforms) {
+        this->shader.setMat4(uniformName, mat);
+        draw();
+    }
+}

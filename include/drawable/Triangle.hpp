@@ -33,6 +33,7 @@ public:
     ~Triangle();
 
     void draw() const override;
+    void draw(const std::vector<glm::mat4>& transforms, const std::string& uniformName) const override;
 };
 
 #endif // TRIANGLE_HPP

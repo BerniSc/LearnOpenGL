@@ -46,6 +46,13 @@ void Triangle::draw() const {
     vao.unbind();
 }
 
+void Triangle::draw(const std::vector<glm::mat4>& transforms, const std::string& uniformName) const {
+    for(const glm::mat4& mat : transforms) {
+        this->shader.setMat4(uniformName, mat);
+        draw();
+    }
+}
+
 Triangle::~Triangle() {
 
 }

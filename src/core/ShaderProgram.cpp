@@ -25,7 +25,7 @@ void ShaderProgram::use() const {
     glUseProgram(id);
 }
 
-GLint ShaderProgram::getUniformLocation(const std::string& name) {
+GLint ShaderProgram::getUniformLocation(const std::string& name) const {
     // Alternative way to get the location is via slow Querry to GPU
     // glGetUniformLocation(ID, name.c_str())
     if(uniformLocations.find(name) == uniformLocations.end())
@@ -33,24 +33,29 @@ GLint ShaderProgram::getUniformLocation(const std::string& name) {
     return uniformLocations[name];
 }
 
-void ShaderProgram::setBool(const std::string &name, bool value) {         
+void ShaderProgram::setBool(const std::string &name, bool value) const {         
     this->use();
     glUniform1i(getUniformLocation(name), (int)value); 
 }
 
-void ShaderProgram::setInt(const std::string &name, int value) { 
+void ShaderProgram::setInt(const std::string &name, int value) const { 
     this->use();
     glUniform1i(getUniformLocation(name), value); 
 }
 
-void ShaderProgram::setFloat(const std::string& name, float value) {
+void ShaderProgram::setFloat(const std::string& name, float value) const {
     this->use();
     glUniform1f(getUniformLocation(name), value);
 }
 
-void ShaderProgram::setFloat4(const std::string& name, float x, float y, float z, float w) {
+void ShaderProgram::setFloat4(const std::string& name, float x, float y, float z, float w) const {
     this->use();
     glUniform4f(getUniformLocation(name), x, y, z, w);
+}
+
+void ShaderProgram::setMat4(const std::string& name, const glm::mat4& mat) const {
+    this->use();
+    glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
 }
 
 GLuint ShaderProgram::getID() const {

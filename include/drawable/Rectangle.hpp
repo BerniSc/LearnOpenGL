@@ -21,7 +21,9 @@ private:
 
 public:
     Rectangle(const ShaderProgram& shader, const float* vertices = defaultVertices, bool wireframeMode = false);
+
     void draw() const override;
+    void draw(const std::vector<glm::mat4>& transforms, const std::string& uniformName) const override;
 };
 
 #endif // RECTANGLE_HPP

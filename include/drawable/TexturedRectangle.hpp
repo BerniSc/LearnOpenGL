@@ -33,6 +33,7 @@ public:
             const std::vector<VertexAttribute>& attributes, const float* vertices = defaultVertices);
 
     void draw() const override;
+    void draw(const std::vector<glm::mat4>& transforms, const std::string& uniformName) const override;
 };
 
 #endif // TEXTURED_RECTANGLE_HPP

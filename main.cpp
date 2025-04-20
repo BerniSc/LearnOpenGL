@@ -17,6 +17,7 @@
 #include "drawable/TexturedRectangle.hpp"
 #include "drawable/Triangle.hpp"
 #include "drawable/Rectangle.hpp"
+#include "glm/fwd.hpp"
 
 void processInput(GLFWwindow *window, float& mixValue);
 
@@ -27,7 +28,7 @@ int main() {
 
         // Create our Projection matrixes
         glm::mat4 model = glm::mat4(1.0f);                                              // Model translates from local to global
-        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+        /*model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); */
 
         glm::mat4 view = glm::mat4(1.0f);                                               // View translates global to "camera"
         // translating the scene reverse of where we want to move our camera (camera stays "fixed", we move the scene)
@@ -36,7 +37,6 @@ int main() {
         glm::mat4 projection;                                                           // Projection transforms "camera" to clip
         // Want to use perspective projection instead of orthografic for "realism" :-)
         projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-
 
         // Load our shaders from files
         Shader texture3DV(GL_VERTEX_SHADER, "./shaders/3DTexture.vs.glsl", true);
@@ -70,6 +70,20 @@ int main() {
         texture3D.setInt("texture2", 1);
         texture3D.setFloat("mixValue", mixValue);
 
+        // Place mutliple Cubes using these positions and one single instance
+        glm::vec3 cubePositions[] = {
+            glm::vec3( 0.0f,  0.0f,  0.0f), 
+            glm::vec3( 2.0f,  5.0f, -15.0f), 
+            glm::vec3(-1.5f, -2.2f, -2.5f),  
+            glm::vec3(-3.8f, -2.0f, -12.3f),  
+            glm::vec3( 2.4f, -0.4f, -3.5f),  
+            glm::vec3(-1.7f,  3.0f, -7.5f),  
+            glm::vec3( 1.3f, -2.0f, -2.5f),  
+            glm::vec3( 1.5f,  2.0f, -2.5f), 
+            glm::vec3( 1.5f,  0.2f, -1.5f), 
+            glm::vec3(-1.3f,  1.0f, -1.5f)  
+        };
+
         // Prevent weird overlap of rotation cube-faces
         glEnable(GL_DEPTH_TEST);  
 
@@ -79,7 +93,19 @@ int main() {
             texture3D.setFloat("mixValue", mixValue);
             window.clear();
 
-            model = glm::rotate(model, (float)glfwGetTime() * 0.0001f, glm::vec3(0.5f, 1.0f, 0.0f));
+            // Generate a Vector of all the needed Positions of our Cube, apply 
+            std::vector<glm::mat4> cubeTransforms;
+
+            for(const auto& position : cubePositions) {
+                // Translate each cube based on the first defined global "model" and then have each of them rotate in their own local space 
+                // as not to move the axis of view
+                glm::mat4 locModel = glm::translate(model, position);            // Apply translation
+
+                float angle = (float)glfwGetTime() * glm::radians(50.0f);        // Time-based rotation
+                locModel = glm::rotate(locModel, angle, glm::vec3(1.0f, 1.0f, 0.0f));
+
+                cubeTransforms.push_back(locModel);
+            }
 
             int modelLoc = glGetUniformLocation(texture3D.getID(), "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -89,7 +115,8 @@ int main() {
             glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
             /*rectangle.draw();*/
-            cube.draw();
+            cube.draw(cubeTransforms, "model");
+
             window.display();
             window.pollEvents();
 

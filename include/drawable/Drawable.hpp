@@ -1,8 +1,10 @@
 #ifndef DRAWABLE_HPP
 #define DRAWABLE_HPP
 
+#include <string>
 #include <vector>
 #include "core/VertexAttribute.hpp"
+#include "glm/ext/matrix_float4x4.hpp"
 
 class Drawable {
     protected:
@@ -20,6 +22,7 @@ class Drawable {
     public:
         virtual ~Drawable() = default;
         virtual void draw() const = 0;
+        virtual void draw(const std::vector<glm::mat4>& transforms, const std::string& uniformName) const = 0;
 };
 
 #endif // !DRAWABLE_HPP
