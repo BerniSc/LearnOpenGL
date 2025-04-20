@@ -5,176 +5,97 @@
 #include <memory>
 #include <vector>
 
-#include "core/GLException.hpp"
-#include "core/GLWindow.hpp"
-#include "core/Shader.hpp"
-#include "core/ShaderProgram.hpp"
-#include "drawable/TexturedRectangle.hpp"
-#include "drawable/Triangle.hpp"
-#include "drawable/Rectangle.hpp"
-
-const char* vertexShaderSrc = R"glsl(
-#version 330 core
-layout (location = 0) in vec3 aPos;
-out vec4 vertexColor;
-void main() {
-    gl_Position = vec4(aPos, 1.0);
-    vertexColor = vec4(0.5, 0.0, 0.0, 1.0); 
-}
-)glsl";
-
-const char* fragmentShaderSrc = R"glsl(
-#version 330 core
-out vec4 FragColor;
-in vec4 vertexColor;
-void main() {
-    FragColor = vertexColor;
-}
-)glsl";
-
-void processInput(GLFWwindow *window, float& mixValue);
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-void playgroundTestGLM(ShaderProgram& s) {
-    //
-    // Keep w as 1; Later used for perspective transformations
-    glm::vec4 vector(1.0f, 0.0f, 0.0f, 1.0f);
-    // Unit matrix
-    glm::mat4 translationMatrix = glm::mat4(1.0f);
-    float t = float(glfwGetTime());
-    // Create a translationMatrix in matrix passed by ref using vec
-    translationMatrix = glm::translate(translationMatrix, glm::vec3(0.1f * std::sin(t), 0.3f * std::cos(t) * std::sin(3*t), 0.0f));
-    // Rotate by 90 deg converted to rad on z axis and scale each coordinate by 0.5
-    // REMEMBER that rotationAxis should be unitVector -> Normalize
-    translationMatrix = glm::rotate(translationMatrix, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    translationMatrix = glm::scale(translationMatrix, glm::vec3(1.5 * std::cos(0.1f * t), 1.5 * std::cos(0.09f * t), 1));  
-    // Translate vector as expected
-    /*vector = translationMatrix * vector;*/
-    /*std::cout << vector.x << " " << vector.y << " " << vector.z << std::endl;*/
-    unsigned int transformLoc = glGetUniformLocation(s.getID(), "transformM");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(translationMatrix));
-}
+#include "core/GLException.hpp"
+#include "core/GLWindow.hpp"
+#include "core/Shader.hpp"
+#include "core/ShaderProgram.hpp"
+#include "drawable/TexturedCube.hpp"
+#include "drawable/TexturedRectangle.hpp"
+#include "drawable/Triangle.hpp"
+#include "drawable/Rectangle.hpp"
+
+void processInput(GLFWwindow *window, float& mixValue);
 
 int main() {
 
     try {
-        GLWindow window(800, 800, "Refactored OpenGL");
+        GLWindow window(800, 800, "Refactored OpenGL - Going 3D");
 
-        // Load shaders from files
-        Shader vertexShader(GL_VERTEX_SHADER, "./shaders/simpleVertexShader.vs.glsl", true);          // true means load from file
-        Shader fragmentShader(GL_FRAGMENT_SHADER, "./shaders/triangle.fs.glsl", true);                // true means load from file
+        // Create our Projection matrixes
+        glm::mat4 model = glm::mat4(1.0f);                                              // Model translates from local to global
+        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
 
-        Shader colourfullVertexShader(GL_VERTEX_SHADER, "./shaders/triangle.vs.glsl", true);
-        Shader colourfullFragmentShader(GL_FRAGMENT_SHADER, "./shaders/shaderPipedColour.fs.glsl", true);
+        glm::mat4 view = glm::mat4(1.0f);                                               // View translates global to "camera"
+        // translating the scene reverse of where we want to move our camera (camera stays "fixed", we move the scene)
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
-        Shader uniformedVectexShader(GL_VERTEX_SHADER, "./shaders/simpleVertexShader.vs.glsl", true);
-        Shader uniformedFragmentShader(GL_FRAGMENT_SHADER, "./shaders/shaderUniformed.fs.glsl", true);
-        
-        // Shader Programs
-        ShaderProgram shader(vertexShader, fragmentShader);
-        ShaderProgram breathing(uniformedVectexShader, uniformedFragmentShader);
-        ShaderProgram colourfullProg(colourfullVertexShader, colourfullFragmentShader); 
-        /*breathing.setFloat4("uniformedColor", 0.0f, 0.8f, 0.0f, 0.0f);*/
+        glm::mat4 projection;                                                           // Projection transforms "camera" to clip
+        // Want to use perspective projection instead of orthografic for "realism" :-)
+        projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
-        Shader taskTestPipeV(GL_VERTEX_SHADER, "./shaders/shaderPipedColour.vs.glsl", true);
-        Shader taskTestPipeF(GL_FRAGMENT_SHADER, "./shaders/shaderPipedColour.fs.glsl", true);
-        ShaderProgram testTest(taskTestPipeV, taskTestPipeF);
 
-        // Vertices for shapes
-        static constexpr float triangleVertices[9] = {
-            -0.5f, -0.3f, 0.0f, 
-             0.5f, -0.3f, 0.0f, 
-             0.0f,  0.8f, 0.0f  
+        // Load our shaders from files
+        Shader texture3DV(GL_VERTEX_SHADER, "./shaders/3DTexture.vs.glsl", true);
+        Shader texture3DF(GL_FRAGMENT_SHADER, "./shaders/3DTexture.fs.glsl", true);
+        ShaderProgram texture3D(texture3DV, texture3DF);
+
+        // Setup the texure
+        std::vector<std::shared_ptr<Texture>> textures;
+        textures.emplace_back(std::make_shared<Texture>("./assets/wall.jpg", GL_TEXTURE0));
+        textures.emplace_back(std::make_shared<Texture>("./assets/awesomeface.png", GL_TEXTURE1));
+
+        static constexpr float rectangleVertices[20] = {
+            // coordinates    | TexCoords
+            0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // Top Right
+            0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Bottom Right
+           -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // Bottom Left
+           -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // Top Left
         };
 
-        static constexpr float triangleReversedVerticesWithColour[18] = {
-            -0.55f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-             0.55f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-             0.0f,  -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-        };
-        std::vector<VertexAttribute> attributesVertexColour = {
+        std::vector<VertexAttribute> rectangleAttributes = {
             {0, 3, GL_FLOAT, GL_FALSE, 0},
-            {1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float)}
+            {1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float)},
         };
 
-        static constexpr float rectangleVertices[12] = {
-            0.5f,  0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-           -0.5f, -0.5f, 0.0f,
-           -0.5f,  0.5f, 0.0f
-        };
-
-        // Create drawable objects
-        /*Triangle triangle(shader, triangleVertices, true);*/
-        Triangle triangle(testTest, triangleVertices);
-        Triangle triangleRevered(colourfullProg, triangleReversedVerticesWithColour, 3, 6 * sizeof(float), attributesVertexColour, false);
-        Rectangle rectangle(breathing, rectangleVertices);
-
-        float timeStamp = glfwGetTime();
-        float breathingGreenValue = 0.0f;
-        float breathingBlueValue = 0.0f;
-        float breathingRedValue = 0.0f;
-
-        static constexpr float defaultVertices[32] = {
-            // | Positions    | Tex-Coordinates
-            0.3f,  0.3f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, 2.0f,  // top right
-            0.3f, -0.3f, 0.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f,  // bottom right
-           -0.3f, -0.3f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  // bottom left
-           -0.3f,  0.3f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f,  // top left
-        };
-
-        std::vector<VertexAttribute> textureAttributes = {
-            {0, 3, GL_FLOAT, GL_FALSE, 0},
-            {1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float)},
-            {2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float)}
-        };
-
-        Shader simpleTextureVS(GL_VERTEX_SHADER, "./shaders/simpleTexture.vs.glsl", true);
-        Shader simpleTextureFS(GL_FRAGMENT_SHADER, "./shaders/simpleTexture.fs.glsl", true);
-        ShaderProgram simpleTexture(simpleTextureVS, simpleTextureFS);
-        /*Texture wall = Texture("./assets/wall.jpg", GL_TEXTURE0);*/
-        /*Texture face = Texture("./assets/wall.jpg", GL_TEXTURE1);*/
-        /*Texture face = Texture("./assets/awesomeface.png", GL_TEXTURE1);*/
-        std::vector<std::shared_ptr<Texture>> tmp;
-        tmp.emplace_back(std::make_shared<Texture>("./assets/wall.jpg", GL_TEXTURE0));
-        tmp.emplace_back(std::make_shared<Texture>("./assets/awesomeface.png", GL_TEXTURE1));
-        /*tmp.emplace_back("./assets/wall.jpg", GL_TEXTURE0);*/
-        /*tmp.emplace_back("./assets/awesomeface.png", GL_TEXTURE1);*/
-        tmp[1]->setStuff();
-        simpleTexture.setInt("texture1", 0);
-        simpleTexture.setInt("texture2", 1);
-        TexturedRectangle trect(simpleTexture, tmp, 4, 8 * sizeof(float), textureAttributes, defaultVertices);
-        /*TexturedRectangle trect(simpleTexture, "./assets/wall.jpg", 4, 8 * sizeof(float), textureAttributes, defaultVertices);*/
-
+        TexturedRectangle rectangle(texture3D, textures, 4, 5 * sizeof(float), rectangleAttributes, rectangleVertices);
+        TexturedCube cube(texture3D, textures, 36, 5 * sizeof(float), rectangleAttributes);
 
         float mixValue = 0.2f;
-        simpleTexture.setFloat("mixValue", mixValue);
+
+        texture3D.setInt("texture1", 0);
+        texture3D.setInt("texture2", 1);
+        texture3D.setFloat("mixValue", mixValue);
+
+        // Prevent weird overlap of rotation cube-faces
+        glEnable(GL_DEPTH_TEST);  
 
         // Main render loop
         while(window.shouldKeepAlive()) {
             processInput(window.get(), mixValue);
+            texture3D.setFloat("mixValue", mixValue);
             window.clear();
-            rectangle.draw();
-            triangleRevered.draw();
-            triangle.draw();
-            trect.draw();
-            playgroundTestGLM(simpleTexture);
+
+            model = glm::rotate(model, (float)glfwGetTime() * 0.0001f, glm::vec3(0.5f, 1.0f, 0.0f));
+
+            int modelLoc = glGetUniformLocation(texture3D.getID(), "model");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+            int viewLoc = glGetUniformLocation(texture3D.getID(), "view");
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+            int projectionLoc = glGetUniformLocation(texture3D.getID(), "projection");
+            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+            /*rectangle.draw();*/
+            cube.draw();
             window.display();
             window.pollEvents();
 
-            // Recalculate Breathing
-            breathing.setFloat4("uniformedColor", breathingRedValue, breathingGreenValue, breathingBlueValue, 1.0f);
-            breathingGreenValue = (std::sin(timeStamp / 2) / 2.0f) + 0.5f;
-            breathingBlueValue = (std::sin(timeStamp / 3 + M_2_PI) / 2.0f) + 0.5f;
-            breathingRedValue = (std::sin(timeStamp / 4) / 2.0f) + 0.5f;
-            timeStamp = glfwGetTime();
-
-            simpleTexture.setFloat("mixValue", mixValue);
+            // Clear our Depth-Buffer and also the colourbuffer to allow for it dynamically changing each iteration
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
-
     } catch(const GLException& ex) {
         std::cerr << ex << std::endl;
         return EXIT_FAILURE;
