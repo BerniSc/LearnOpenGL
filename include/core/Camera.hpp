@@ -43,6 +43,8 @@ class Camera {
         void ProcessMouseMovement(float xOffset, float yOffset, bool constrainPitch = true);
         // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
         void ProcessMouseScroll(float yOffset);
+
+        void pointCameraAt(const glm::vec3& target);
 };
 
 #endif // !CAMERA_HPP

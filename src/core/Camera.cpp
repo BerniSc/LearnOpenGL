@@ -52,6 +52,16 @@ glm::mat4 Camera::getProjectionMatrix(std::size_t windowWidth, std::size_t windo
     return glm::perspective(glm::radians(this->config.zoom), (float)windowWidth / (float)windowHeight, near, far);
 }
 
+void Camera::pointCameraAt(const glm::vec3& target) {
+    glm::vec3 direction = glm::normalize(target - cameraPosition);
+
+    // Calculate yaw and pitch from direction vector
+    pitch = glm::degrees(std::asin(direction.y));
+    yaw = glm::degrees(std::atan2(direction.z, direction.x));
+
+    updateCameraVectors();
+}
+
 void Camera::ProcessKeyboard(CameraMovement direction, float deltaTime) {
     float velocity = this->config.speed * deltaTime;
 
