@@ -3,6 +3,7 @@
 
 #include "config/CameraConfig.hpp"
 
+#include <cstddef>
 #include <glm/glm.hpp>
 
 class Camera {
@@ -27,9 +28,11 @@ class Camera {
         void updateCameraVectors();
 
     public:   
-        Camera(glm::vec3 cameraPosition, glm::vec3 worldUp, CameraConfig config = CameraConfig());
+        Camera(glm::vec3 cameraPosition, glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f), CameraConfig config = CameraConfig());
 
         glm::mat4 getViewMatrix() const;
+
+        glm::mat4 getProjectionMatrix(std::size_t windowWidth, std::size_t windowHeight, float near = 0.1f, float far = 100.0f) const;
 
         // Processing Handlers
         //

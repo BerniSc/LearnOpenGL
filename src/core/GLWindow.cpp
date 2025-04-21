@@ -33,6 +33,7 @@ void GLWindow::init() {
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, int w, int h) {
         glViewport(0, 0, w, h);
     });
+
 }
 
 bool GLWindow::shouldKeepAlive() const {
@@ -54,4 +55,12 @@ void GLWindow::pollEvents() const {
 
 GLFWwindow* GLWindow::get() const {
     return window;
+}
+
+void GLWindow::setCallbackContext(CallbackContext& context) const {
+    glfwSetWindowUserPointer(window, &context);
+}
+
+CallbackContext* GLWindow::getCallbackContext() const {
+    return static_cast<CallbackContext*>(glfwGetWindowUserPointer(window));
 }

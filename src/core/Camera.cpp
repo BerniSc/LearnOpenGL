@@ -1,23 +1,27 @@
 #include "core/Camera.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/geometric.hpp"
 
-Camera::Camera(glm::vec3 cameraPosition, glm::vec3 cameraTarget) : cameraPosition(cameraPosition), cameraTarget(cameraTarget) {
-    // Intuitively it would be camTarget - camPos, but we changed the order here to have the coordinates
-    // point in the same direction as our pos z from the camera (instead of always having -z).
-    // Effectively this is not the direction of the camera but rather the direct light-ray getting picked up by the camera
-    cameraDirection = glm::normalize(cameraPosition - cameraTarget);
+#include <glm/geometric.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-    // Generate our right vector by crossing our local cameradirection with the global "up" vector
-    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-    cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-
-    // Using cameraDirection and cameraRight we can get the cameraUp now
-    cameraUp = glm::cross(cameraDirection, cameraRight);
-
-
-    // With all these we can Generate a LookAt matrix -> Takes in arbitrary coordinate and transform it to our own "camera space"
-}
+/**/
+/*Camera::Camera(glm::vec3 cameraPosition, glm::vec3 cameraTarget) : cameraPosition(cameraPosition), cameraTarget(cameraTarget) {*/
+/*    // Intuitively it would be camTarget - camPos, but we changed the order here to have the coordinates*/
+/*    // point in the same direction as our pos z from the camera (instead of always having -z).*/
+/*    // Effectively this is not the direction of the camera but rather the direct light-ray getting picked up by the camera*/
+/*    cameraDirection = glm::normalize(cameraPosition - cameraTarget);*/
+/**/
+/*    // Generate our right vector by crossing our local cameradirection with the global "up" vector*/
+/*    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);*/
+/*    cameraRight = glm::normalize(glm::cross(up, cameraDirection));*/
+/**/
+/*    // Using cameraDirection and cameraRight we can get the cameraUp now*/
+/*    cameraUp = glm::cross(cameraDirection, cameraRight);*/
+/**/
+/**/
+/*    // With all these we can Generate a LookAt matrix -> Takes in arbitrary coordinate and transform it to our own "camera space"*/
+/*}*/
+/**/
 
 Camera::Camera(glm::vec3 cameraPosition, glm::vec3 worldUp, CameraConfig config) :
     config(config), cameraDirection(glm::vec3(0.0f, 0.0f, -1.0f)), worldUp(worldUp) {
@@ -42,6 +46,10 @@ void Camera::updateCameraVectors() {
 
 glm::mat4 Camera::getViewMatrix() const {
     return glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
+}
+
+glm::mat4 Camera::getProjectionMatrix(std::size_t windowWidth, std::size_t windowHeight, float near, float far) const {
+    return glm::perspective(glm::radians(this->config.zoom), (float)windowWidth / (float)windowHeight, near, far);
 }
 
 void Camera::ProcessKeyboard(CameraMovement direction, float deltaTime) {
