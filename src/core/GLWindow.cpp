@@ -1,9 +1,19 @@
 #include "core/GLWindow.hpp"
 #include "core/GLException.hpp"
 
-GLWindow::GLWindow(int width, int height, const std::string& title)
-    : width(width), height(height), title(title) {
+GLWindow::GLWindow(int width, int height, const std::string& title, bool hasDepthTest)
+    : width(width), height(height), title(title), hasDepthTest(hasDepthTest) {
+
+    // Set our clearmask based on our "featureset"
+    clearMask = 0;
+    clearMask |= GL_COLOR_BUFFER_BIT;
+    if(hasDepthTest)
+        clearMask |= GL_DEPTH_BUFFER_BIT;
     init();
+
+    // Prevent weird overlap of rotation cube-faces
+    if(hasDepthTest)
+        glEnable(GL_DEPTH_TEST);
 }
 
 GLWindow::~GLWindow() {
@@ -42,7 +52,7 @@ bool GLWindow::shouldKeepAlive() const {
 
 void GLWindow::clear() const {
     glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(clearMask);
 }
 
 void GLWindow::display() const {

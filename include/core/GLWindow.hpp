@@ -14,10 +14,15 @@ class GLWindow {
         int height;
         std::string title;
 
+        GLbitfield clearMask;
+
+        // Enabled for Depth-Test
+        const bool hasDepthTest;
+
         void init();
 
     public:
-        GLWindow(int width, int height, const std::string& title);
+        GLWindow(int width, int height, const std::string& title, bool hasDepthTest = true);
         ~GLWindow();
 
         bool shouldKeepAlive() const;
