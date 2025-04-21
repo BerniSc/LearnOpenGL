@@ -4,7 +4,7 @@ INCLUDES = -I./include  -I./
 TARGET = main
 
 # Source files
-SRCS = glad.o src/core/GLException.cpp src/core/GLWindow.cpp src/core/IndexBuffer.cpp src/core/Shader.cpp src/core/ShaderProgram.cpp src/core/Texture.cpp src/core/VertexArray.cpp src/core/VertexBuffer.cpp src/drawable/Rectangle.cpp src/drawable/TexturedRectangle.cpp src/drawable/TexturedCube.cpp src/drawable/Triangle.cpp src/core/Camera.cpp src/config/CameraConfig.cpp main.cpp 
+SRCS = glad.o src/core/GLException.cpp src/core/GLWindow.cpp src/core/IndexBuffer.cpp src/core/Shader.cpp src/core/ShaderProgram.cpp src/core/Texture.cpp src/core/VertexArray.cpp src/core/VertexBuffer.cpp src/drawable/Rectangle.cpp src/drawable/TexturedRectangle.cpp src/drawable/TexturedCube.cpp src/drawable/Triangle.cpp src/core/Camera.cpp src/config/CameraConfig.cpp games/3DSnake/main.cpp 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
 
