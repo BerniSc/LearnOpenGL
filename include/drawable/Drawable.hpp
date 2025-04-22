@@ -1,6 +1,7 @@
 #ifndef DRAWABLE_HPP
 #define DRAWABLE_HPP
 
+#include <functional>
 #include <string>
 #include <vector>
 #include "core/VertexAttribute.hpp"
@@ -22,7 +23,8 @@ class Drawable {
     public:
         virtual ~Drawable() = default;
         virtual void draw() const = 0;
-        virtual void draw(const std::vector<glm::mat4>& transforms, const std::string& uniformName) const = 0;
+        virtual void draw(const std::vector<glm::mat4>& transforms, const std::string& uniformName, 
+                          const std::function<void(int)>& perInstanceUniformSetter = nullptr) const = 0;
 };
 
 #endif // !DRAWABLE_HPP

@@ -86,9 +86,14 @@ void TexturedRectangle::draw() const {
     vao.unbind();
 }
 
-void TexturedRectangle::draw(const std::vector<glm::mat4>& transforms, const std::string& uniformName) const {
+void TexturedRectangle::draw(const std::vector<glm::mat4>& transforms, const std::string& uniformName, const std::function<void(int)>& perInstanceUniformSetter) const {
+    uint8_t counter = 0;
     for(const glm::mat4& mat : transforms) {
         this->shader.setMat4(uniformName, mat);
+
+        // Set extra uniforms like color, id, etc.
+        if(perInstanceUniformSetter)
+            perInstanceUniformSetter(counter++);
         draw();
     }
 }

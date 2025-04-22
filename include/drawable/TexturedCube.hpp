@@ -64,7 +64,7 @@ class TexturedCube : public Drawable {
                 const std::vector<VertexAttribute>& attributes, const float* vertices = cubeFallbackVertices);
 
         void draw() const override;
-        void draw(const std::vector<glm::mat4>& transforms, const std::string& uniformName) const override;
+        void draw(const std::vector<glm::mat4>& transforms, const std::string& uniformName, const std::function<void(int)>& perInstanceUniformSetter = nullptr) const override;
 };
 
 #endif // TEXTURED_CUBE_HPP
