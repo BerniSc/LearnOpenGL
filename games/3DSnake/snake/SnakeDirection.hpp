@@ -2,12 +2,12 @@
 #define SNAKE_DIRECTION_HPP
 
 enum SnakeDirection {
-    FORWARD,
-    BACKWARD,
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN
+    SNAKE_FORWARD,
+    SNAKE_BACKWARD,
+    SNAKE_LEFT,
+    SNAKE_RIGHT,
+    SNAKE_UP,
+    SNAKE_DOWN
 };
 
 #endif // !SNAKE_DIRECTION_HPP
