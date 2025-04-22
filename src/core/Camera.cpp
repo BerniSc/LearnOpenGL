@@ -62,6 +62,10 @@ void Camera::pointCameraAt(const glm::vec3& target) {
     updateCameraVectors();
 }
 
+void Camera::setCameraPosition(const glm::vec3& target) {
+    this->cameraPosition = target;
+}
+
 void Camera::ProcessKeyboard(CameraMovement direction, float deltaTime) {
     float velocity = this->config.speed * deltaTime;
 

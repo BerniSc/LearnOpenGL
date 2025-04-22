@@ -45,6 +45,7 @@ class Camera {
         void ProcessMouseScroll(float yOffset);
 
         void pointCameraAt(const glm::vec3& target);
+        void setCameraPosition(const glm::vec3& target);
 };
 
 #endif // !CAMERA_HPP
