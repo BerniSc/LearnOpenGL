@@ -172,8 +172,8 @@ int main() {
         shader.setFloat("breath", t);
 
         shader.setFloat("sqrt3", 1.732050807568877);
-        // const float SQRT3 = 1.732050807568877;
 
+        // Init colour, even if we dont want to use it, with 1 so we have them after shadermult^^
         shader.setFloat("breathR", 1.0f);
         shader.setFloat("breathG", 1.0f);
         shader.setFloat("breathB", 1.0f);
@@ -181,9 +181,10 @@ int main() {
         while(window.shouldKeepAlive()) {
             processInput(window.get(), shader);
             
-            float tr = (0.5 * std::sin(glfwGetTime())) + 0.5f;
+            // Update bearthing every iteration
+            float tr = (0.5 * std::sin(glfwGetTime() / 2.0f)) + 0.5f;
             float tg = (0.5 * std::sin(glfwGetTime() * 0.25f)) + 0.5f;
-            float tb = (0.5 * std::sin(glfwGetTime()) * 0.6f) + 0.5f;
+            float tb = (0.5 * std::sin(glfwGetTime() * 0.6f)) + 0.5f;
             shader.setFloat("breathR", tr);
             shader.setFloat("breathG", tg);
             shader.setFloat("breathB", tb);
