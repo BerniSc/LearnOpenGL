@@ -82,6 +82,15 @@ void processInput(GLFWwindow *window, ShaderProgram& shader) {
                 root3.x = 0.98774;
                 root3.y = 2.02204;
             }
+
+            if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+                root1.x = 0.26132;
+                root1.y = -0.0273117;
+                root2.x = -0.710967;
+                root2.y = 0.811377;
+                root3.x = -0.476081;
+                root3.y = -0.878705;
+            }
         }
     } else {
 
@@ -185,9 +194,9 @@ int main() {
             float tr = (0.5 * std::sin(glfwGetTime() / 2.0f)) + 0.5f;
             float tg = (0.5 * std::sin(glfwGetTime() * 0.25f)) + 0.5f;
             float tb = (0.5 * std::sin(glfwGetTime() * 0.6f)) + 0.5f;
-            shader.setFloat("breathR", tr);
-            shader.setFloat("breathG", tg);
-            shader.setFloat("breathB", tb);
+            // shader.setFloat("breathR", tr);
+            // shader.setFloat("breathG", tg);
+            // shader.setFloat("breathB", tb);
 
             window.clear();
             rectangle.draw();

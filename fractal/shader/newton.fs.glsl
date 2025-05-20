@@ -64,6 +64,13 @@ vec2 fPrime(vec2 z) {
     return complexAdd(complexAdd(term1, term2), term3);
 }
 
+vec2 fPrimePrime(vec2 z) {
+    vec2 term1 = complexSub(z, root1);
+    vec2 term2 = complexSub(z, root2);
+    vec2 term3 = complexSub(z, root3);
+    return 2 * (complexAdd(complexAdd(term1, term2), term3));
+}
+
 void main() {
     // Pixel2normalizedDeviceCoords for Shader [-1;1]
     float aspect = width / height;
@@ -87,7 +94,11 @@ void main() {
             break;
             
         // Newton: z - fx/fxdx
-        z = z - complexDiv(f(z), fPrime(z));
+        // z = z - complexDiv(f(z), fPrime(z));
+
+        // Different: z - (fxfxdxa)/(fxdx^2-fxfxdxdx)
+        z = z - complexDiv(complexMul(f(z), fPrime(z)), \
+                (complexSub(complexMul(fPrime(z), fPrime(z)), complexMul(f(z), fPrimePrime(z)))));
     }
     
     // Color based on closest root
