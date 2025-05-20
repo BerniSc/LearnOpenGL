@@ -88,7 +88,7 @@ void main() {
     
     // Newton iteration
     for(int i = 0; i < 100; i++) {
-        // Exit early if we already converge
+        // Exit early if we already converge, Cool effect by checking against original root^ ^
         // if(checkRoot(z, r1) || checkRoot(z, r2) || checkRoot(z, r3))
         if(checkRoot(z, root1) || checkRoot(z, root2) || checkRoot(z, root3))
             break;

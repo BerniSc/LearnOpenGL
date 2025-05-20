@@ -112,9 +112,9 @@ void processInput(GLFWwindow *window, ShaderProgram& shader) {
      }
 
     if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        std::cout << "root1.x = " << root1.x << ";\n" << "root1.y = " << root1.y << "\n" \
-                  << "root2.x = " << root2.x << ";\n" << "root2.y = " << root2.y << "\n" \
-                  << "root3.x = " << root3.x << ";\n" << "root3.y = " << root3.y << std::endl;
+        std::cout << "root1.x = " << root1.x << ";\n" << "root1.y = " << root1.y << ";\n" \
+                  << "root2.x = " << root2.x << ";\n" << "root2.y = " << root2.y << ";\n" \
+                  << "root3.x = " << root3.x << ";\n" << "root3.y = " << root3.y << ";" << std::endl;
 
     // Update shader uniforms
     shader.setFloat("zz", zoom);
