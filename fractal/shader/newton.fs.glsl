@@ -109,6 +109,13 @@ void main() {
     if(checkRoot(z, root1)) color.r = 1.0 * breathR;
     if(checkRoot(z, root2)) color.g = 1.0 * breathG;
     if(checkRoot(z, root3)) color.b = 1.0 * breathB;
+
+    // Visualize real roots
+    // float epsilon = 1e-6;
+    float epsilon = 1e-5;
+    if(length(z - root1) < epsilon || length(z - root2) < epsilon || length(z - root3) < epsilon) {
+        color = vec3(1.0, 1.0, 0.0); // Bright yellow for exact root
+    }
     
     FragColor = vec4(color, 1.0);
 }
